@@ -36,6 +36,9 @@ img_filter_png_quality                  9;
 img_filter_convert_allow_only_quality   on;
 ```
 
+# Requirements
+
+- webp, gif, jpeg, png, libgd
 
 # Install (RockyLinux 8 or Higher)
 
