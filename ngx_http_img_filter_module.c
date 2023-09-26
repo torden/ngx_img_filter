@@ -232,7 +232,7 @@ static ngx_str_t  ngx_http_img_types[] = {
 
 static ngx_int_t ngx_http_img_header_filter(ngx_http_request_t *r) {
 
-    off_t                          len;
+    off_t                        len;
     ngx_http_img_filter_ctx_t   *ctx;
     ngx_http_img_filter_conf_t  *conf;
 
@@ -256,7 +256,7 @@ static ngx_int_t ngx_http_img_header_filter(ngx_http_request_t *r) {
     if (r->headers_out.content_type.len >= sizeof("multipart/x-mixed-replace") - 1
         && ngx_strncasecmp(r->headers_out.content_type.data, (u_char *) "multipart/x-mixed-replace", sizeof("multipart/x-mixed-replace") - 1) == 0)
     {
-        ngx_log_error(NGX_LOG_ERR, r->connection->log, 0, "img filter: multipart/x-mixed-replace response");
+        ngx_log_error(NGX_LOG_ERR, r->connection->log, 0, "[=] img filter: multipart/x-mixed-replace response");
 
         return NGX_ERROR;
     }
@@ -271,7 +271,7 @@ static ngx_int_t ngx_http_img_header_filter(ngx_http_request_t *r) {
     len = r->headers_out.content_length_n;
 
     if (len != -1 && len > (off_t) conf->buffer_size) {
-        ngx_log_error(NGX_LOG_ERR, r->connection->log, 0, "img filter: too big response: %O", len); 
+        ngx_log_error(NGX_LOG_ERR, r->connection->log, 0, "[=] img filter: too big response: %O", len); 
         return NGX_HTTP_UNSUPPORTED_MEDIA_TYPE;
     }
 
@@ -301,7 +301,7 @@ static ngx_int_t ngx_http_img_body_filter(ngx_http_request_t *r, ngx_chain_t *in
     ngx_http_img_filter_ctx_t   *ctx;
     ngx_http_img_filter_conf_t  *conf;
 
-    ngx_log_debug0(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "img filter - body +++++++++");
+    ngx_log_debug0(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "[=] img filter - body");
 
     if (in == NULL) {
         return ngx_http_next_body_filter(r, in);
@@ -430,7 +430,7 @@ static ngx_uint_t ngx_http_img_test(ngx_http_request_t *r, ngx_chain_t *in) {
         return NGX_HTTP_IMG_NONE;
     }
 
-    ngx_log_debug2(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "img filter: \"%c%c\"", p[0], p[1]);
+    ngx_log_debug2(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "[=] img filter: \"%c%c\"", p[0], p[1]);
 
     if (p[0] == 0xff && p[1] == 0xd8) {
 
@@ -485,12 +485,12 @@ static ngx_int_t ngx_http_img_read(ngx_http_request_t *r, ngx_chain_t *in) {
         b = cl->buf;
         size = b->last - b->pos;
 
-        ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "image buf: %uz", size);
+        ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "[=] image buf: %uz", size);
 
         rest = ctx->image + ctx->length - p;
 
         if (size > rest) {
-            ngx_log_error(NGX_LOG_ERR, r->connection->log, 0, "img filter: too big response");
+            ngx_log_error(NGX_LOG_ERR, r->connection->log, 0, "[=] img filter: too big response");
             return NGX_ERROR;
         }
 
@@ -510,7 +510,7 @@ static ngx_int_t ngx_http_img_read(ngx_http_request_t *r, ngx_chain_t *in) {
 }
 
 
-static ngx_buf_t * ngx_http_img_process(ngx_http_request_t *r) {
+static ngx_buf_t *ngx_http_img_process(ngx_http_request_t *r) {
 
     ngx_int_t                      rc;
     ngx_http_img_filter_ctx_t   *ctx;
@@ -594,7 +594,7 @@ static ngx_buf_t * ngx_http_img_process(ngx_http_request_t *r) {
 }
 
 
-static ngx_buf_t * ngx_http_img_json(ngx_http_request_t *r, ngx_http_img_filter_ctx_t *ctx) {
+static ngx_buf_t *ngx_http_img_json(ngx_http_request_t *r, ngx_http_img_filter_ctx_t *ctx) {
 
     size_t                          len;
     ngx_buf_t                       *b;
@@ -652,7 +652,7 @@ static ngx_buf_t * ngx_http_img_json(ngx_http_request_t *r, ngx_http_img_filter_
 }
 
 
-static ngx_buf_t * ngx_http_img_asis(ngx_http_request_t *r, ngx_http_img_filter_ctx_t *ctx) {
+static ngx_buf_t *ngx_http_img_asis(ngx_http_request_t *r, ngx_http_img_filter_ctx_t *ctx) {
 
     ngx_buf_t  *b;
 
@@ -706,7 +706,7 @@ static ngx_int_t ngx_http_img_size(ngx_http_request_t *r, ngx_http_img_filter_ct
 
             if (p[0] == 0xff && p[1] != 0xff) {
 
-                ngx_log_debug2(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "JPEG: %02xd %02xd", p[0], p[1]);
+                ngx_log_debug2(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "[=] JPEG: %02xd %02xd", p[0], p[1]);
 
                 p++;
 
@@ -715,7 +715,7 @@ static ngx_int_t ngx_http_img_size(ngx_http_request_t *r, ngx_http_img_filter_ct
                     height = p[4] * 256 + p[5];
                 }
 
-                ngx_log_debug2(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "JPEG: %02xd %02xd", p[1], p[2]);
+                ngx_log_debug2(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "[=] JPEG: %02xd %02xd", p[1], p[2]);
 
                 len = p[1] * 256 + p[2];
 
@@ -739,7 +739,7 @@ static ngx_int_t ngx_http_img_size(ngx_http_request_t *r, ngx_http_img_filter_ct
         if (ctx->length / 20 < app) {
             /* force conversion if application data consume more than 5% */
             ctx->force = 1;
-            ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "app data size: %uz", app);
+            ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "[=] app data size: %uz", app);
         }
 
         break;
@@ -821,7 +821,7 @@ static ngx_int_t ngx_http_img_size(ngx_http_request_t *r, ngx_http_img_filter_ct
         return NGX_DECLINED;
     }
 
-    ngx_log_debug2(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "image size: %d x %d", (int) width, (int) height);
+    ngx_log_debug2(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "[=] image size: %d x %d", (int) width, (int) height);
 
     ctx->width = width;
     ctx->height = height;
@@ -833,7 +833,7 @@ static ngx_int_t ngx_http_img_size(ngx_http_request_t *r, ngx_http_img_filter_ct
 static ngx_buf_t *ngx_http_img_resize(ngx_http_request_t *r, ngx_http_img_filter_ctx_t *ctx) {
     int                            sx, sy, dx, dy, ox, oy, ax, ay, size,
                                    colors, palette, transparent, sharpen,
-                                   t;//red, green, blue, t;
+                                   t;
     u_char                        *out;
     ngx_buf_t                     *b;
     ngx_uint_t                     resize;
@@ -852,6 +852,7 @@ static ngx_buf_t *ngx_http_img_resize(ngx_http_request_t *r, ngx_http_img_filter
 
     conf = ngx_http_get_module_loc_conf(r, ngx_http_img_filter_module);
 
+    ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "[+] gd version : %s / extra version : %s", gdVersionString(), gdExtraVersion());
     ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "[+] ctx->force : %d", ctx->force);
     ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "[+] ctx->force : %d", ctx->angle);
     ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "[+] sx :%d", sx);
@@ -1044,7 +1045,7 @@ transparent:
             ox /= 2;
             oy /= 2;
 
-            ngx_log_debug4(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "image crop: %d x %d @ %d x %d", dx, dy, ox, oy);
+            ngx_log_debug4(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "[=] image crop: %d x %d @ %d x %d", dx, dy, ox, oy);
 
             if (colors == 0) {
                 gdImageSaveAlpha(dst, 1);
@@ -1070,8 +1071,7 @@ transparent:
 
     out = ngx_http_img_out(r, ctx->type, dst, &size);
 
-    ngx_log_debug3(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
-                   "image: %d x %d %d", sx, sy, colors);
+    ngx_log_debug3(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "[=] image: %d x %d %d", sx, sy, colors);
 
     gdImageDestroy(dst);
     ngx_pfree(r->pool, ctx->image);
@@ -1118,30 +1118,30 @@ static gdImagePtr ngx_http_img_source(ngx_http_request_t *r, ngx_http_img_filter
 
     case NGX_HTTP_IMG_JPEG:
         img = gdImageCreateFromJpegPtr(ctx->length, ctx->image);
-        failed = "gdImageCreateFromJpegPtr() failed";
+        failed = "[=] gdImageCreateFromJpegPtr() failed";
         break;
 
     case NGX_HTTP_IMG_GIF:
         img = gdImageCreateFromGifPtr(ctx->length, ctx->image);
-        failed = "gdImageCreateFromGifPtr() failed";
+        failed = "[=] gdImageCreateFromGifPtr() failed";
         break;
 
     case NGX_HTTP_IMG_PNG:
         img = gdImageCreateFromPngPtr(ctx->length, ctx->image);
-        failed = "gdImageCreateFromPngPtr() failed";
+        failed = "[=] gdImageCreateFromPngPtr() failed";
         break;
 
     case NGX_HTTP_IMG_WEBP:
 #if (NGX_HAVE_GD_WEBP)
         img = gdImageCreateFromWebpPtr(ctx->length, ctx->image);
-        failed = "gdImageCreateFromWebpPtr() failed";
+        failed = "[=] gdImageCreateFromWebpPtr() failed";
 #else
-        failed = "nginx was built without GD WebP support";
+        failed = "[=] nginx was built without GD WebP support";
 #endif
         break;
 
     default:
-        failed = "unknown image type";
+        failed = "[=] unknown image type";
         break;
     }
 
@@ -1161,8 +1161,7 @@ static gdImagePtr ngx_http_img_new(ngx_http_request_t *r, int w, int h, int colo
         img = gdImageCreateTrueColor(w, h);
 
         if (img == NULL) {
-            ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
-                          "gdImageCreateTrueColor() failed");
+            ngx_log_error(NGX_LOG_ERR, r->connection->log, 0, "[=] gdImageCreateTrueColor() failed");
             return NULL;
         }
 
@@ -1170,8 +1169,7 @@ static gdImagePtr ngx_http_img_new(ngx_http_request_t *r, int w, int h, int colo
         img = gdImageCreate(w, h);
 
         if (img == NULL) {
-            ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
-                          "gdImageCreate() failed");
+            ngx_log_error(NGX_LOG_ERR, r->connection->log, 0, "[=] gdImageCreate() failed");
             return NULL;
         }
     }
@@ -1195,17 +1193,17 @@ static u_char *ngx_http_img_webp_out(ngx_http_request_t *r, ngx_uint_t type, gdI
     }
 
     retval = gdImagePaletteToTrueColor(img);
-    failed = "gdImagePaletteToTrueColor() failed from PNG";
+    failed = "[=] gdImagePaletteToTrueColor() failed from PNG";
     if (retval == 0) {
         return NULL;
     }
 
     out = gdImageWebpPtrEx(img, size, q);
-    failed = "gdImageWebpPtrEx() failed from PNG";
+    failed = "[=] gdImageWebpPtrEx() failed from PNG";
 
-    ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,  "[png to webp] webp size : %d / quality : %d", size, q);
+    ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,  "[=] [png to webp] webp size : %d / quality : %d", size, q);
 #else
-    failed = "nginx was built without GD WebP support";
+    failed = "[=] nginx was built without GD WebP support";
 #endif
 
     if (out == NULL) {
@@ -1231,7 +1229,7 @@ static u_char *ngx_http_img_out(ngx_http_request_t *r, ngx_uint_t type, gdImageP
 #if (NGX_HAVE_GD_WEBP)
         out = ngx_http_img_webp_out(r, type, img, size);
 #else
-        failed = "nginx was built without GD WebP support";
+        failed = "[=] nginx was built without GD WebP support";
 #endif
 
     } else {
@@ -1245,25 +1243,25 @@ static u_char *ngx_http_img_out(ngx_http_request_t *r, ngx_uint_t type, gdImageP
                 }
 
                 out = gdImageJpegPtr(img, size, (int)q);
-                failed = "gdImageJpegPtr() failed";
+                failed = "[=] gdImageJpegPtr() failed";
                 break;
 
             case NGX_HTTP_IMG_GIF:
                 out = gdImageGifPtr(img, size);
-                failed = "gdImageGifPtr() failed";
+                failed = "[=] gdImageGifPtr() failed";
                 break;
 
             case NGX_HTTP_IMG_PNG:
                 q = ngx_http_img_filter_get_value(r, conf->pqcv, conf->png_quality);
                 if (q < -1 || q > 9) {
-                    failed = "invalid png quality value (-1 ~ 9)";
+                    failed = "[=] invalid png quality value (-1 ~ 9)";
                     return NULL;
                 }
 
-                ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,  "+++ png quality : %d", q);
+                ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,  "[-] png quality : %d", q);
 
                 out = gdImagePngPtrEx(img, size, (int)q);
-                failed = "gdImagePngPtr() failed";
+                failed = "[=] gdImagePngPtr() failed";
                 break;
 
             case NGX_HTTP_IMG_WEBP:
@@ -1274,16 +1272,16 @@ static u_char *ngx_http_img_out(ngx_http_request_t *r, ngx_uint_t type, gdImageP
                 }
 
                 out = gdImageWebpPtrEx(img, size, (int)q);
-                failed = "gdImageWebpPtrEx() failed";
+                failed = "[=] gdImageWebpPtrEx() failed";
 #else
-                failed = "nginx was built without GD WebP support";
+                failed = "[=] nginx was built without GD WebP support";
 #endif
-                ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,  "webp size : %d / quality : %d", size, q);
+                ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,  "[-] webp size : %d / quality : %d", size, q);
 
                 break;
 
             default:
-                failed = "unknown image type";
+                failed = "[=] unknown image type";
                 break;
         }
     }
@@ -1435,13 +1433,9 @@ static char *ngx_http_img_filter_merge_conf(ngx_conf_t *cf, void *parent, void *
         }
     }
 
-    ngx_conf_merge_value(conf->transparency, prev->transparency, 1);
-
-    ngx_conf_merge_value(conf->interlace, prev->interlace, 0);
-
-    ngx_conf_merge_size_value(conf->buffer_size, prev->buffer_size,
-                              1 * 1024 * 1024);
-
+    ngx_conf_merge_value(conf->transparency, prev->transparency, 1); 
+    ngx_conf_merge_value(conf->interlace, prev->interlace, 0); 
+    ngx_conf_merge_size_value(conf->buffer_size, prev->buffer_size, 1 * 1024 * 1024); 
     ngx_conf_merge_value(conf->convert_webp, prev->convert_webp, 0);
     ngx_conf_merge_value(conf->convert_allow_only_quality, prev->convert_allow_only_quality, 0);
 
@@ -1508,8 +1502,7 @@ static char *ngx_http_img_filter(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
                 imcf->angle = (ngx_uint_t) n;
 
             } else {
-                imcf->acv = ngx_palloc(cf->pool,
-                                       sizeof(ngx_http_complex_value_t));
+                imcf->acv = ngx_palloc(cf->pool, sizeof(ngx_http_complex_value_t));
                 if (imcf->acv == NULL) {
                     return NGX_CONF_ERROR;
                 }
@@ -1595,8 +1588,7 @@ static char *ngx_http_img_filter(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
 failed:
 
-    ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "invalid parameter \"%V\"",
-                       &value[i]);
+    ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "[=] invalid parameter \"%V\"", &value[i]);
 
     return NGX_CONF_ERROR;
 }
@@ -1627,8 +1619,7 @@ static char *ngx_http_img_filter_jpeg_quality(ngx_conf_t *cf, ngx_command_t *cmd
         n = ngx_http_img_filter_value(&value[1]);
 
         if (n <= 0) {
-            ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-                               "invalid value \"%V\"", &value[1]);
+            ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "[=] invalid value \"%V\"", &value[1]);
             return NGX_CONF_ERROR;
         }
 
@@ -1672,8 +1663,7 @@ static char *ngx_http_img_filter_webp_quality(ngx_conf_t *cf, ngx_command_t *cmd
         n = ngx_http_img_filter_value(&value[1]);
 
         if (n <= 0) {
-            ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-                               "invalid value \"%V\"", &value[1]);
+            ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "[=] invalid value \"%V\"", &value[1]);
             return NGX_CONF_ERROR;
         }
 
@@ -1716,8 +1706,7 @@ static char *ngx_http_img_filter_png_quality(ngx_conf_t *cf, ngx_command_t *cmd,
     if (cv.lengths == NULL) {
         n = atoi((const char *)(&value[1])->data);
         if (n < -1 || n > 9) {
-            ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-                               "invalid value \"%V\"", &value[1]);
+            ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "[=] invalid value \"%V\"", &value[1]);
             return NGX_CONF_ERROR;
         }
 
@@ -1761,8 +1750,7 @@ static char *ngx_http_img_filter_sharpen(ngx_conf_t *cf, ngx_command_t *cmd, voi
         n = ngx_http_img_filter_value(&value[1]);
 
         if (n < 0) {
-            ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-                               "invalid value \"%V\"", &value[1]);
+            ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "[=] invalid value \"%V\"", &value[1]);
             return NGX_CONF_ERROR;
         }
 
