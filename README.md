@@ -8,7 +8,7 @@
 
 # New Features
 
-- Output all images as webp
+- Output all images as webp for Mobile
 - Allow Quality options to work alone
 - Add PNG Compress Level (=Quality) : 0 -> none, 1-9 -> level, -1 -> default
 
