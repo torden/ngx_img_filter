@@ -1,0 +1,33 @@
+ngx_feature="ngx_http_img_filter_module"
+ngx_addon_name="ngx_http_img_filter_module"
+ngx_objs_dirs="$ngx_addon_dir/objs"
+ngx_feature_name="NGX_HAVE_GD_WEBP"
+ngx_feature_run=no
+ngx_feature_incs="#include <gd.h>"
+ngx_feature_path="/app/libgd/include/"
+ngx_feature_libs="-L/app/libgd/lib -Wl,-rpath,/app/libgd/lib -lgd"
+ngx_feature_test="gdImagePtr img = gdImageCreateFromGifPtr(1, NULL);
+(void) img"
+. auto/feature
+
+IMG_FILTER_SRCS="$ngx_addon_dir/ngx_http_img_filter_module.c"
+IMG_FILTER_DEPS=""
+IMG_FILTER_INCS=""
+
+CORE_LIBS="$CORE_LIBS $ngx_feature_libs"
+CORE_INCS="$CORE_INCS -I $ngx_feature_path"
+
+if test -n "$ngx_module_link"; then
+    ngx_module_type=HTTP_AUX_FILTER
+    ngx_module_name=$ngx_addon_name
+    ngx_module_srcs="$IMG_FILTER_SRCS"
+    ngx_module_deps="$IMG_FILTER_DEPS"
+    ngx_module_incs="$IMG_FILTER_INCS $ngx_feature_path"
+    ngx_module_libs="$ngx_module_libs $ngx_feature_libs"
+
+    . auto/module
+else
+    HTTP_AUX_FILTER="$HTTP_AUX_FILTER_MODULES $ngx_addon_name"
+    NGX_ADDON_SRCS="$NGX_ADDON_SRCS $IMG_FILTER_SRCS"
+    NGX_ADDON_DEPS="$NGX_ADDON_SRCS $IMG_FILTER_DEPS $ngx_feature_path"
+fi
