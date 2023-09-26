@@ -39,7 +39,7 @@ img_filter_convert_allow_only_quality   on;
 
 # Install (RockyLinux 8 or Higher)
 
-```
+```bash
 # Install image libs
 dnf install -y zlib \
 zlib-devel \
