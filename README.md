@@ -36,6 +36,15 @@ img_filter_png_quality                  9;
 img_filter_convert_allow_only_quality   on;
 ```
 
+# Compress quality
+
+|*Image Format*|*Range*|
+|--|--|
+|Jpeg|Compression quality (0-95, 0 means use the default)|
+|Webp|Compression quality (0-100)|
+|Png|compression level: 0 -> none, 1-9 -> level, -1 -> default|
+|Gif|N/A|
+
 # Requirements
 
 - webp, gif, jpeg, png, libgd
