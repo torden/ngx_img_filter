@@ -1147,6 +1147,9 @@ static gdImagePtr ngx_http_img_source(ngx_http_request_t *r, ngx_http_img_filter
 
     if (img == NULL) {
         ngx_log_error(NGX_LOG_ERR, r->connection->log, 0, failed);
+    } else {
+        gdImageSetInterpolationMethod(img, GD_BILINEAR_FIXED);
+        ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,  "[=] GD_BILINEAR_FIXED");
     }
 
     return img;
