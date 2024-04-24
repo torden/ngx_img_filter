@@ -4,7 +4,7 @@
 
 # Patch
 
-- Fix : broken image when resizing transparent png image
+- Fix : broken image when resizing trensparent png image
 
 # New Features
 

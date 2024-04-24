@@ -4,8 +4,8 @@ ngx_objs_dirs="$ngx_addon_dir/objs"
 ngx_feature_name="NGX_HAVE_GD_WEBP"
 ngx_feature_run=no
 ngx_feature_incs="#include <gd.h>"
-ngx_feature_path="/usr/local/libgd/include/"
-ngx_feature_libs="-L/usr/local/libgd/lib -Wl,-rpath,/usr/local/libgd/lib -lgd"
+ngx_feature_path="/app/libgd/include/"
+ngx_feature_libs="-L/app/libgd/lib -Wl,-rpath,/app/libgd/lib -lgd"
 ngx_feature_test="gdImagePtr img = gdImageCreateFromGifPtr(1, NULL);
 (void) img"
 . auto/feature
