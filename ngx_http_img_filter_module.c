@@ -117,6 +117,7 @@ static char *ngx_http_img_filter_webp_quality(ngx_conf_t *cf, ngx_command_t *cmd
 static char *ngx_http_img_filter_png_quality(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 static char *ngx_http_img_filter_req_quality(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 static char *ngx_http_img_filter_sharpen(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+static char *ngx_http_img_filter_convert_webp(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 static ngx_int_t ngx_http_img_filter_init(ngx_conf_t *cf);
 
 static ngx_command_t  ngx_http_img_filter_commands[] = {
@@ -186,8 +187,10 @@ static ngx_command_t  ngx_http_img_filter_commands[] = {
 
     { ngx_string("img_filter_convert_webp"),
       NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_HTTP_LIF_CONF|NGX_CONF_FLAG,
+      //ngx_http_img_filter_convert_webp,
       ngx_conf_set_flag_slot,
       NGX_HTTP_LOC_CONF_OFFSET,
+      //0, 
       offsetof(ngx_http_img_filter_conf_t, convert_webp),
       NULL },
 
@@ -356,7 +359,7 @@ static ngx_int_t ngx_http_img_body_filter(ngx_http_request_t *r, ngx_chain_t *in
         /* override content type */
         // move to 1345 line at convert_webp=on
         convert_webp = ngx_http_img_filter_get_value(r, conf->cwcv, conf->convert_webp);
-        ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "[-][=][-] convert_webp : %d", convert_webp);
+        ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "[-][=][-] convert_webp : %d / ctx->type : %d (%d)", convert_webp, ctx->type, NGX_HTTP_IMG_WEBP);
 
         if (convert_webp == 0) {
             ct = &ngx_http_img_types[ctx->type - 1];
@@ -364,6 +367,7 @@ static ngx_int_t ngx_http_img_body_filter(ngx_http_request_t *r, ngx_chain_t *in
             r->headers_out.content_type = *ct;
             r->headers_out.content_type_lowcase = NULL;
         }
+
 
         if (conf->filter == NGX_HTTP_IMG_TEST) {
             ctx->phase = NGX_HTTP_IMG_PASS;
@@ -1425,23 +1429,18 @@ static u_char *ngx_http_img_webp_out(ngx_http_request_t *r, ngx_http_img_filter_
     // win : asis!
     if ( ctx->width <= ctx->max_width && ctx->height <= ctx->max_height && ctx->angle == 0 && !ctx->force && asis_size < tmp_size ) {
 
-        ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,  "[=] ASIS!!!!!!!!!!!!!!!!!!!! / asis_size : %d", asis_size);
-        ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,  "[=] ASIS!!!!!!!!!!!!!!!!!!!! / asis_size : %d", asis_size);
-
-
+        ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,  "[=] ASIS!!!!!!!!!!!!!!!!!!!! / asis_size : %d / ctx->type : %d", asis_size, ctx->type);
         if (tmp_out != NULL) {
             gdFree(tmp_out);
             tmp_out = NULL;
         }
 
-        //ngx_buf_t *tmp_asis_img = ngx_http_img_asis(r, ctx);
-        //tmp_size = asis_size;
-        //memcpy(tmp_out, ctx->last, asis_size);
-
-        tmp_out = ctx->last;
+        tmp_out = ctx->image;
         tmp_size = asis_size;
 
+        ct = &ngx_http_img_types[ctx->type - 1];
         r->headers_out.content_length_n = tmp_size; 
+        r->headers_out.content_length = NULL;
         r->headers_out.content_type_len = ct->len;
         r->headers_out.content_type = *ct;
         r->headers_out.content_type_lowcase = NULL;
@@ -2100,6 +2099,48 @@ static char *ngx_http_img_filter_sharpen(ngx_conf_t *cf, ngx_command_t *cmd, voi
         }
 
         *imcf->shcv = cv;
+    }
+
+    return NGX_CONF_OK;
+}
+
+static char *ngx_http_img_filter_convert_webp(ngx_conf_t *cf, ngx_command_t *cmd, void *conf) {
+
+    ngx_http_img_filter_conf_t *imcf = conf;
+
+    ngx_str_t                         *value;
+    ngx_int_t                          n;
+    ngx_http_complex_value_t           cv;
+    ngx_http_compile_complex_value_t   ccv;
+
+    value = cf->args->elts;
+
+    ngx_memzero(&ccv, sizeof(ngx_http_compile_complex_value_t));
+
+    ccv.cf = cf;
+    ccv.value = &value[1];
+    ccv.complex_value = &cv;
+
+    if (ngx_http_compile_complex_value(&ccv) != NGX_OK) {
+        return NGX_CONF_ERROR;
+    }
+
+    if (cv.lengths == NULL) {
+        n = atoi((const char *)(&value[1])->data);
+        if (n < 0 || n > 1) {
+            ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "[=] invalid value \"%V\"", &value[1]);
+            return NGX_CONF_ERROR;
+        }
+
+        imcf->convert_webp = (ngx_uint_t) n;
+
+    } else {
+        imcf->cwcv = ngx_palloc(cf->pool, sizeof(ngx_http_complex_value_t));
+        if (imcf->cwcv == NULL) {
+            return NGX_CONF_ERROR;
+        }
+
+        *imcf->cwcv = cv;
     }
 
     return NGX_CONF_OK;
