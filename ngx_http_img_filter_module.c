@@ -1584,7 +1584,7 @@ static u_char *ngx_http_img_out(ngx_http_request_t *r, ngx_http_img_filter_ctx_t
 static void ngx_http_img_cleanup(void *data) {
 
     if (data != NULL ) {
-        //gdFree(data);
+        gdFree(data);
         data = NULL;
     }
 }
