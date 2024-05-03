@@ -704,6 +704,8 @@ static ngx_buf_t *ngx_http_img_asis(ngx_http_request_t *r, ngx_http_img_filter_c
 
     ngx_buf_t  *b;
 
+    ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "[=] !!!!!!! call the ngx_http_img_asis !!!!!!!");
+
     b = ngx_calloc_buf(r->pool);
     if (b == NULL) {
         return NULL;
@@ -1429,18 +1431,32 @@ static u_char *ngx_http_img_webp_out(ngx_http_request_t *r, ngx_http_img_filter_
     // win : asis!
     if ( ctx->width <= ctx->max_width && ctx->height <= ctx->max_height && ctx->angle == 0 && !ctx->force && asis_size < tmp_size ) {
 
-        ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,  "[=] ASIS!!!!!!!!!!!!!!!!!!!! / asis_size : %d / ctx->type : %d", asis_size, ctx->type);
+        ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,  "[=] ASIS!!!");
+        ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,  "[=] ----------------------------------------"); 
+        ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,  "[=] asis_size : %d", asis_size);
+        ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,  "[=] ngx_strlen(ctx->image) : %d", ngx_strlen(ctx->image));
+        ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,  "[=] ctx->type : %d", ctx->type);
         if (tmp_out != NULL) {
             gdFree(tmp_out);
             tmp_out = NULL;
         }
 
-        tmp_out = ctx->image;
+        tmp_out  = ngx_palloc(r->pool, asis_size);
+        if (tmp_out  == NULL) {
+            ngx_log_error(NGX_LOG_ERR, r->connection->log, 0, "[=] img filter: failed to palloc to asis image");
+            return NULL;
+        }
+
+        ngx_memcpy(tmp_out, ctx->image, asis_size);
+
+
         tmp_size = asis_size;
 
         ct = &ngx_http_img_types[ctx->type - 1];
+
         r->headers_out.content_length_n = tmp_size; 
         r->headers_out.content_length = NULL;
+
         r->headers_out.content_type_len = ct->len;
         r->headers_out.content_type = *ct;
         r->headers_out.content_type_lowcase = NULL;
@@ -1548,6 +1564,7 @@ static u_char *ngx_http_img_out(ngx_http_request_t *r, ngx_http_img_filter_ctx_t
 #if (NGX_HAVE_GD_WEBP)
         ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,  "[=] ORIGINAL SIZE : %d", *size);
         ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,  "[=] convert to webp");
+        ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,  "[=] ---------------------------------------------------------------------------");
 
         out = ngx_http_img_webp_out(r, ctx, img, size, out, q);
 #else
