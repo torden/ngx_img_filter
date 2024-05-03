@@ -1441,14 +1441,15 @@ static u_char *ngx_http_img_webp_out(ngx_http_request_t *r, ngx_http_img_filter_
             tmp_out = NULL;
         }
 
-        tmp_out  = ngx_palloc(r->pool, asis_size);
+        //tmp_out = ngx_palloc(r->pool, asis_size);
+        tmp_out = malloc(asis_size);
         if (tmp_out  == NULL) {
             ngx_log_error(NGX_LOG_ERR, r->connection->log, 0, "[=] img filter: failed to palloc to asis image");
             return NULL;
         }
+        memset(tmp_out, 0x00, asis_size);
 
         ngx_memcpy(tmp_out, ctx->image, asis_size);
-
 
         tmp_size = asis_size;
 
