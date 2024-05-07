@@ -1401,9 +1401,9 @@ static u_char *ngx_http_img_webp_out(ngx_http_request_t *r, ngx_http_img_filter_
     //check : web_lossless
     if ( tmp_size > webp_lossless_size) {
 
-        if (org_out != NULL) {
-            gdFree(org_out);
-            org_out = NULL;
+        if (tmp_out != NULL) {
+            gdFree(tmp_out);
+            tmp_out = NULL;
         }
 
         ctx->convert_type = NGX_HTTP_IMG_WEBP;
@@ -1412,6 +1412,7 @@ static u_char *ngx_http_img_webp_out(ngx_http_request_t *r, ngx_http_img_filter_
         tmp_out = webp_lossless_out;
         ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,  "[=] set the webp lossless");
     }
+
 
     //check : web_compress
     if (tmp_size > webp_compress_size) {
@@ -1442,12 +1443,12 @@ static u_char *ngx_http_img_webp_out(ngx_http_request_t *r, ngx_http_img_filter_
         }
 
         //tmp_out = ngx_palloc(r->pool, asis_size);
-        tmp_out = malloc(asis_size);
+        tmp_out = malloc(asis_size+1);
         if (tmp_out  == NULL) {
             ngx_log_error(NGX_LOG_ERR, r->connection->log, 0, "[=] img filter: failed to palloc to asis image");
             return NULL;
         }
-        memset(tmp_out, 0x00, asis_size);
+        memset(tmp_out, 0x00, asis_size+1);
 
         ngx_memcpy(tmp_out, ctx->image, asis_size);
 
