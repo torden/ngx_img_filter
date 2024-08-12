@@ -1367,7 +1367,9 @@ static u_char *ngx_http_img_webp_out(ngx_http_request_t *r, ngx_http_img_filter_
 
     //get user request quality
     user_req_quality = ngx_http_img_filter_get_value(r, conf->rqcv, conf->req_quality);
-    //user_req_quality = conf->req_quality;
+	if (user_req_quality <= 0) {
+    	user_req_quality = webp_target_quality;
+	}
 
 
     //lossless
@@ -1493,7 +1495,7 @@ static u_char *ngx_http_img_webp_out(ngx_http_request_t *r, ngx_http_img_filter_
 #endif
 
     if (out == NULL) {
-        ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, failed);
+        ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "%s", failed);
     }
 
     return out;
@@ -1517,10 +1519,15 @@ static u_char *ngx_http_img_out(ngx_http_request_t *r, ngx_http_img_filter_ctx_t
         case NGX_HTTP_IMG_JPEG:
             q = ngx_http_img_filter_get_value(r, conf->jqcv, conf->jpeg_quality);
             if (q <= 0) {
-                return NULL;
+                q = conf->jpeg_quality;
             }
 
+            ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,  "[-][=][-] make a jpeg quality : %d", q);
+            ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,  "[-][=][-] make a jpeg size : %d", *size);
             out = gdImageJpegPtr(img, size, (int)q);
+
+            ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,  "[-][=][-] jpeg.out : %d", ngx_strlen(out));
+
             failed = "[=] gdImageJpegPtr() failed";
             break;
 
