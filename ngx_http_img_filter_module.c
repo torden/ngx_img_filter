@@ -122,77 +122,77 @@ static ngx_int_t ngx_http_img_filter_init(ngx_conf_t *cf);
 static ngx_command_t  ngx_http_img_filter_commands[] = {
 
     { ngx_string("img_filter"),
-      NGX_HTTP_LOC_CONF|NGX_CONF_TAKE123,
+      NGX_HTTP_LOC_CONF|NGX_CONF_TAKE123|NGX_HTTP_LIF_CONF,
       ngx_http_img_filter,
       NGX_HTTP_LOC_CONF_OFFSET,
       0,
       NULL },
 
     { ngx_string("img_filter_jpeg_quality"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
+      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1|NGX_HTTP_LIF_CONF,
       ngx_http_img_filter_jpeg_quality,
       NGX_HTTP_LOC_CONF_OFFSET,
       0,
       NULL },
 
     { ngx_string("img_filter_webp_quality"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
+      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1|NGX_HTTP_LIF_CONF,
       ngx_http_img_filter_webp_quality,
       NGX_HTTP_LOC_CONF_OFFSET,
       0,
       NULL },
 
     { ngx_string("img_filter_png_quality"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
+      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1|NGX_HTTP_LIF_CONF,
       ngx_http_img_filter_png_quality,
       NGX_HTTP_LOC_CONF_OFFSET,
       0,
       NULL },
 
     { ngx_string("img_filter_req_quality"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
+      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1|NGX_HTTP_LIF_CONF,
       ngx_http_img_filter_req_quality,
       NGX_HTTP_LOC_CONF_OFFSET,
       0,
       NULL },
 
     { ngx_string("img_filter_sharpen"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
+      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1|NGX_HTTP_LIF_CONF,
       ngx_http_img_filter_sharpen,
       NGX_HTTP_LOC_CONF_OFFSET,
       0,
       NULL },
 
     { ngx_string("img_filter_transparency"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_FLAG,
+      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_FLAG|NGX_HTTP_LIF_CONF,
       ngx_conf_set_flag_slot,
       NGX_HTTP_LOC_CONF_OFFSET,
       offsetof(ngx_http_img_filter_conf_t, transparency),
       NULL },
 
     { ngx_string("img_filter_interlace"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_FLAG,
+      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_FLAG|NGX_HTTP_LIF_CONF,
       ngx_conf_set_flag_slot,
       NGX_HTTP_LOC_CONF_OFFSET,
       offsetof(ngx_http_img_filter_conf_t, interlace),
       NULL },
 
     { ngx_string("img_filter_buffer"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
+      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1|NGX_HTTP_LIF_CONF,
       ngx_conf_set_size_slot,
       NGX_HTTP_LOC_CONF_OFFSET,
       offsetof(ngx_http_img_filter_conf_t, buffer_size),
       NULL },
 
     { ngx_string("img_filter_convert_webp"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_HTTP_LIF_CONF|NGX_CONF_FLAG,
+      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_HTTP_LIF_CONF|NGX_CONF_FLAG|NGX_HTTP_LIF_CONF,
       ngx_conf_set_flag_slot,
       NGX_HTTP_LOC_CONF_OFFSET,
       offsetof(ngx_http_img_filter_conf_t, convert_webp),
       NULL },
 
     { ngx_string("img_filter_convert_allow_only_quality"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_FLAG,
+      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_FLAG|NGX_HTTP_LIF_CONF,
       ngx_conf_set_flag_slot,
       NGX_HTTP_LOC_CONF_OFFSET,
       offsetof(ngx_http_img_filter_conf_t, convert_allow_only_quality),
@@ -249,6 +249,8 @@ static ngx_int_t ngx_http_img_header_filter(ngx_http_request_t *r) {
     off_t                        len;
     ngx_http_img_filter_ctx_t   *ctx;
     ngx_http_img_filter_conf_t  *conf;
+
+    ngx_log_debug0(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "[=] img filter - header");
 
     if (r->headers_out.status == NGX_HTTP_NOT_MODIFIED || r->headers_out.content_length_n == 0) {
         return ngx_http_next_header_filter(r);
@@ -316,15 +318,18 @@ static ngx_int_t ngx_http_img_body_filter(ngx_http_request_t *r, ngx_chain_t *in
     ngx_http_img_filter_conf_t  *conf;
     ngx_int_t                   convert_webp;
 
-    ngx_log_debug0(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "[=] img filter - body");
+    ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "[=] img filter -------------------------------------------------------------------------");
+    ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "[=] img filter - body");
 
     if (in == NULL) {
+        ngx_log_debug0(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "[=] img filter - next body (in is null)");
         return ngx_http_next_body_filter(r, in);
     }
 
     ctx = ngx_http_get_module_ctx(r, ngx_http_img_filter_module);
 
     if (ctx == NULL) {
+        ngx_log_debug0(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "[=] img filter - next body (ctx is null)");
         return ngx_http_next_body_filter(r, in);
     }
 
@@ -350,13 +355,14 @@ static ngx_int_t ngx_http_img_body_filter(ngx_http_request_t *r, ngx_chain_t *in
                 }
             }
 
+            ngx_log_debug0(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "[=] img filter - failed to IMG_START");
             return ngx_http_filter_finalize_request(r, &ngx_http_img_filter_module, NGX_HTTP_UNSUPPORTED_MEDIA_TYPE);
         }
 
         /* override content type */
         // move to 1345 line at convert_webp=on
         convert_webp = ngx_http_img_filter_get_value(r, conf->cwcv, conf->convert_webp);
-        ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "[-][=][-] convert_webp : %d / ctx->type : %d (%d)", convert_webp, ctx->type, NGX_HTTP_IMG_WEBP);
+        ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "[=] img filter - convert_webp : %d / ctx->type : %d (%d)", convert_webp, ctx->type, NGX_HTTP_IMG_WEBP);
 
         if (convert_webp == 0) {
             ct = &ngx_http_img_types[ctx->type - 1];
@@ -385,6 +391,7 @@ static ngx_int_t ngx_http_img_body_filter(ngx_http_request_t *r, ngx_chain_t *in
         }
 
         if (rc == NGX_ERROR) {
+            ngx_log_debug0(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "[=] img filter - failed to IMG_READ");
             return ngx_http_filter_finalize_request(r, &ngx_http_img_filter_module, NGX_HTTP_UNSUPPORTED_MEDIA_TYPE);
         }
 
@@ -395,22 +402,26 @@ static ngx_int_t ngx_http_img_body_filter(ngx_http_request_t *r, ngx_chain_t *in
         out.buf = ngx_http_img_process(r);
 
         if (out.buf == NULL) {
+            ngx_log_debug0(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "[=] img filter - failed to IMG_PROCESS");
             return ngx_http_filter_finalize_request(r, &ngx_http_img_filter_module, NGX_HTTP_UNSUPPORTED_MEDIA_TYPE);
         }
 
         out.next = NULL;
         ctx->phase = NGX_HTTP_IMG_PASS;
 
+        ngx_log_debug0(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "[=] img filter - failed to IMG_PROCESS+IMG_PASS");
         return ngx_http_img_send(r, ctx, &out);
 
     case NGX_HTTP_IMG_PASS:
 
+        ngx_log_debug0(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "[=] img filter - failed to IMG_PASS");
         return ngx_http_next_body_filter(r, in);
 
     default: /* NGX_HTTP_IMG_DONE */
 
         rc = ngx_http_next_body_filter(r, NULL);
 
+        ngx_log_debug0(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "[=] img filter - failed to IMG_DONE");
         /* NGX_ERROR resets any pending data */
         return (rc == NGX_OK) ? NGX_ERROR : rc;
     }
@@ -443,12 +454,14 @@ static ngx_uint_t ngx_http_img_test(ngx_http_request_t *r, ngx_chain_t *in) {
     u_char  *p;
 
     p = in->buf->pos;
+    ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "[=] img filter - img_test : %d", ngx_strlen(p));
 
     if (in->buf->last - p < 16) {
         return NGX_HTTP_IMG_NONE;
     }
 
-    ngx_log_debug2(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "[=] img filter: \"%c%c\"", p[0], p[1]);
+    ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "[=] img filter - \"%c%c\"", p[0], p[1]);
+    ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "[=] img filter - img_test");
 
     if (p[0] == 0xff && p[1] == 0xd8) {
 
@@ -500,6 +513,7 @@ static ngx_uint_t ngx_http_img_test(ngx_http_request_t *r, ngx_chain_t *in) {
         return NGX_HTTP_IMG_WEBP;
     }
 
+    ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "[=] img filter - img_test  - img_none");
     return NGX_HTTP_IMG_NONE;
 }
 
@@ -529,7 +543,7 @@ static ngx_int_t ngx_http_img_read(ngx_http_request_t *r, ngx_chain_t *in) {
         b = cl->buf;
         size = b->last - b->pos;
 
-        ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "[=] image buf: %uz", size);
+        ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "[=] image filter buf: %uz", size);
 
         rest = ctx->image + ctx->length - p;
 
@@ -1367,9 +1381,7 @@ static u_char *ngx_http_img_webp_out(ngx_http_request_t *r, ngx_http_img_filter_
 
     //get user request quality
     user_req_quality = ngx_http_img_filter_get_value(r, conf->rqcv, conf->req_quality);
-	if (user_req_quality <= 0) {
-    	user_req_quality = webp_target_quality;
-	}
+    //user_req_quality = conf->req_quality;
 
 
     //lossless
@@ -1495,7 +1507,7 @@ static u_char *ngx_http_img_webp_out(ngx_http_request_t *r, ngx_http_img_filter_
 #endif
 
     if (out == NULL) {
-        ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "%s", failed);
+        ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, failed);
     }
 
     return out;
@@ -1519,15 +1531,10 @@ static u_char *ngx_http_img_out(ngx_http_request_t *r, ngx_http_img_filter_ctx_t
         case NGX_HTTP_IMG_JPEG:
             q = ngx_http_img_filter_get_value(r, conf->jqcv, conf->jpeg_quality);
             if (q <= 0) {
-                q = conf->jpeg_quality;
+                return NULL;
             }
 
-            ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,  "[-][=][-] make a jpeg quality : %d", q);
-            ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,  "[-][=][-] make a jpeg size : %d", *size);
             out = gdImageJpegPtr(img, size, (int)q);
-
-            ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,  "[-][=][-] jpeg.out : %d", ngx_strlen(out));
-
             failed = "[=] gdImageJpegPtr() failed";
             break;
 
